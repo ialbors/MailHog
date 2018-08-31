@@ -1,6 +1,6 @@
 VERSION=1.0.0
 
-all: fmt combined
+all: fmt dependencies combined
 
 combined:
 	go install .
@@ -10,6 +10,9 @@ release: tag release-deps
 
 fmt:
 	go fmt ./...
+
+dependencies:
+	go get ./...
 
 release-deps:
 	go get github.com/mitchellh/gox
