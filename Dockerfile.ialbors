@@ -1,0 +1,33 @@
+#
+# MailHog Dockerfile
+#
+FROM golang:1.10.4-alpine3.8 as builder
+
+RUN apk add make
+
+WORKDIR /go/src/github.com/ialbors/MailHog
+
+COPY . .
+
+RUN make
+
+FROM alpine:3.8
+
+# Add mailhog user/group with uid/gid 1000.
+# This is a workaround for boot2docker issue #581, see
+# https://github.com/boot2docker/boot2docker/issues/581
+RUN adduser -D -u 1000 mailhog
+
+USER mailhog
+
+WORKDIR /home/mailhog
+
+COPY --from=0 /go/bin/MailHog  .
+
+COPY taric.json .
+
+ENTRYPOINT ["./MailHog", "-outgoing-smtp", "taric.json"]
+
+# Expose the SMTP and HTTP ports:
+EXPOSE 1025 8025
+
