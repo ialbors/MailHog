@@ -4,12 +4,12 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"net/http"
-	"net/smtp"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/gorilla/pat"
+	smtp2 "github.com/ialbors/MailHog/smtp"
 	"github.com/ian-kent/go-log/log"
 	"github.com/mailhog/MailHog-Server/config"
 	"github.com/mailhog/data"
@@ -316,15 +316,15 @@ func (apiv1 *APIv1) release_one(w http.ResponseWriter, req *http.Request) {
 	}
 	bytes = append(bytes, []byte("\r\n"+msg.Content.Body)...)
 
-	var auth smtp.Auth
+	var auth smtp2.Auth
 
 	if len(cfg.Username) > 0 || len(cfg.Password) > 0 {
 		log.Printf("Found username/password, using auth mechanism: [%s]", cfg.Mechanism)
 		switch cfg.Mechanism {
 		case "CRAMMD5":
-			auth = smtp.CRAMMD5Auth(cfg.Username, cfg.Password)
+			auth = smtp2.CRAMMD5Auth(cfg.Username, cfg.Password)
 		case "PLAIN":
-			auth = smtp.PlainAuth("", cfg.Username, cfg.Password, cfg.Host)
+			auth = smtp2.PlainAuth("", cfg.Username, cfg.Password, cfg.Host)
 		default:
 			log.Printf("Error - invalid authentication mechanism")
 			w.WriteHeader(400)
@@ -332,7 +332,7 @@ func (apiv1 *APIv1) release_one(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	err = smtp.SendMail(cfg.Host+":"+cfg.Port, auth, "nobody@"+apiv1.config.Hostname, []string{cfg.Email}, bytes)
+	err = smtp2.SendMail(cfg.Host+":"+cfg.Port, auth, "nobody@"+apiv1.config.Hostname, []string{cfg.Email}, bytes, apiv1.config.IgnoreStartTLS)
 	if err != nil {
 		log.Printf("Failed to release message: %s", err)
 		w.WriteHeader(500)
