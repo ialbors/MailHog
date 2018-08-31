@@ -1,6 +1,6 @@
 VERSION=1.0.0
 
-all: fmt dependencies combined
+all: fmt generate dependencies combined
 
 combined:
 	go install .
@@ -13,6 +13,9 @@ fmt:
 
 dependencies:
 	go get ./...
+
+generate:
+	go generate
 
 release-deps:
 	go get github.com/mitchellh/gox

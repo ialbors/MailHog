@@ -1,5 +1,7 @@
 package main
 
+//go:generate ./build_utils/generate_smtp.sh
+
 import (
 	"flag"
 	"fmt"
